@@ -45,6 +45,26 @@
             <div class="col-md-8">
                 <div class="card p-4 shadow-sm border-0">
                     <h5 class="fw-bold mb-3">Vulnerability Dashboard</h5>
+                    <form method="GET" action="/" class="row g-2 mb-4">
+                        <div class="col-md-6">
+                            <input type="text" name="search" class="form-control" placeholder="Search title..." value="{{ search_query }}">
+                        </div>
+                        <div class="col-md-4">
+                            <select name="severity" class="form-select">
+                                <option value="">-- All Severities --</option>
+                                <option value="Low" {% if severity_filter == 'Low' %}selected{% endif %}>Low</option>
+                                <option value="Medium" {% if severity_filter == 'Medium' %}selected{% endif %}>Medium</option>
+                                <option value="High" {% if severity_filter == 'High' %}selected{% endif %}>High</option>
+                                <option value="Critical" {% if severity_filter == 'Critical' %}selected{% endif %}>Critical</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex gap-1">
+                            <button type="submit" class="btn btn-secondary w-100">Filter</button>
+                            {% if search_query or severity_filter %}
+                                <a href="/" class="btn btn-outline-secondary">Clear</a>
+                            {% endif %}
+                        </div>
+                    </form>
                     <table class="table align-middle">
                         <thead>
                             <tr>
