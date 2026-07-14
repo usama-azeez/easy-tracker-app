@@ -52,6 +52,7 @@
                                 <th>Description</th>
                                 <th>Severity</th>
                                 <th>Status</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -60,11 +61,30 @@
                                 <td><strong>{{ vuln.title }}</strong></td>
                                 <td class="text-muted">{{ vuln.description }}</td>
                                 <td><span class="badge bg-secondary">{{ vuln.severity }}</span></td>
-                                <td><span class="badge bg-warning text-dark">{{ vuln.status }}</span></td>
+                                <td>
+                                    {% if vuln.status == 'Resolved' %}
+                                        <span class="badge bg-success">Resolved</span>
+                                    {% elif vuln.status == 'In Progress' %}
+                                        <span class="badge bg-primary">In Progress</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Open</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        {% if vuln.status == 'Open' %}
+                                            <a href="/start/{{ vuln.id }}" class="btn btn-sm btn-outline-primary">Start</a>
+                                        {% endif %}
+                                        {% if vuln.status != 'Resolved' %}
+                                            <a href="/resolve/{{ vuln.id }}" class="btn btn-sm btn-outline-success">Resolve</a>
+                                        {% endif %}
+                                        <a href="/delete/{{ vuln.id }}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                    </div>
+                                </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="4" class="text-center py-3 text-muted">No issues found. System secure!</td>
+                                <td colspan="5" class="text-center py-3 text-muted">No issues found.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
