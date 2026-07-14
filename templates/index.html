@@ -14,12 +14,64 @@
     </nav>
 
     <div class="container">
-        <div class="text-center mt-5 p-5 bg-white rounded shadow-sm">
-            <h1 class="display-4 fw-bold text-dark mb-3">Welcome to Easy Tracker</h1>
-            <p class="lead text-muted">A modern cybersecurity issue and vulnerability tracking dashboard.</p>
-            <div class="spinner-border text-primary mt-3" role="status">
-                <span class="visually-hidden">Loading...</span>
+        <div class="row">
+            
+            <div class="col-md-4 mb-4">
+                <div class="card p-4 shadow-sm border-0">
+                    <h5 class="fw-bold mb-3">Report New Issue</h5>
+                    <form action="/add" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g., Weak Passwords" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3" placeholder="Describe the vulnerability details..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Severity</label>
+                            <select name="severity" class="form-select">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
+                    </form>
+                </div>
             </div>
+
+            <div class="col-md-8">
+                <div class="card p-4 shadow-sm border-0">
+                    <h5 class="fw-bold mb-3">Vulnerability Dashboard</h5>
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vuln in vulns %}
+                            <tr>
+                                <td><strong>{{ vuln.title }}</strong></td>
+                                <td class="text-muted">{{ vuln.description }}</td>
+                                <td><span class="badge bg-secondary">{{ vuln.severity }}</span></td>
+                                <td><span class="badge bg-warning text-dark">{{ vuln.status }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3 text-muted">No issues found. System secure!</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 

@@ -1,5 +1,5 @@
-from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy # <-- Added SQLAlchemy import
+from flask import Flask, render_template, request, redirect, url_for  # <-- Added request, redirect, and url_for imports
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
@@ -22,12 +22,34 @@ class Vulnerability(db.Model):
 with app.app_context():
     db.create_all()
 
+# 1. READ Route: Display all vulnerabilities
 @app.route('/')
 def home():
-    # Query all vulnerabilities from our database (currently empty)
     vulns = Vulnerability.query.all()
-    # Pass the vulnerabilities list into the HTML template
     return render_template('index.html', vulns=vulns)
+
+# 2. CREATE Route: Handle form submission and save to SQLite
+@app.route('/add', methods=['POST'])
+def add():
+    # Grab data sent from the form inputs
+    title = request.form.get('title')
+    description = request.form.get('description')
+    severity = request.form.get('severity')
+
+    # Construct database object (default status is "Open")
+    new_vuln = Vulnerability(
+        title=title, 
+        description=description, 
+        severity=severity, 
+        status="Open"
+    )
+
+    # Save to SQLite Database
+    db.session.add(new_vuln)
+    db.session.commit()
+
+    # Redirect user back to the homepage to see their new issue listed
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
