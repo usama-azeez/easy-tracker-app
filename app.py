@@ -51,5 +51,29 @@ def add():
     # Redirect user back to the homepage to see their new issue listed
     return redirect(url_for('home'))
 
+    # UPDATE Route: Mark as "In Progress"
+    @app.route('/start/<int:id>')
+    def start(id):
+        vuln = Vulnerability.query.get_or_404(id)
+        vuln.status = "In Progress"
+        db.session.commit()
+        return redirect(url_for('home'))
+
+#    UPDATE Route: Mark as "Resolved"
+    @app.route('/resolve/<int:id>')
+    def resolve(id):
+        vuln = Vulnerability.query.get_or_404(id)
+        vuln.status = "Resolved"
+        db.session.commit()
+        return redirect(url_for('home'))
+
+    # DELETE Route: Remove the record
+    @app.route('/delete/<int:id>')
+    def delete(id):
+        vuln = Vulnerability.query.get_or_404(id)
+        db.session.delete(vuln)
+        db.session.commit()
+        return redirect(url_for('home'))
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
