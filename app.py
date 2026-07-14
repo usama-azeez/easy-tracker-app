@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-import html
+import html  # Python's built-in HTML sanitizer
 
 app = Flask(__name__)
 
@@ -23,41 +23,51 @@ class Vulnerability(db.Model):
 with app.app_context():
     db.create_all()
 
-
-# 1. READ Route: Display all vulnerabilities (with Search & Filter)
+# 1. READ Route: Display all vulnerabilities (with Search, Filter, and Metrics)
 @app.route('/')
 def home():
-    # Grab optional filters from the URL query parameters
     search_query = request.args.get('search', '')
     severity_filter = request.args.get('severity', '')
 
-    # Begin database query
     query = Vulnerability.query
 
-    # If the user typed a search term, filter titles containing that term
     if search_query:
         query = query.filter(Vulnerability.title.contains(search_query))
-    
-    # If the user selected a specific severity, filter by that severity
     if severity_filter:
         query = query.filter(Vulnerability.severity == severity_filter)
 
-    # Execute the final query
     vulns = query.all()
 
-    # Render template and pass back search terms to keep them in the inputs
-    return render_template('index.html', vulns=vulns, search_query=search_query, severity_filter=severity_filter)
+    # --- CALCULATE METRICS ---
+    total_count = Vulnerability.query.count()
+    resolved_count = Vulnerability.query.filter_by(status="Resolved").count()
+    remediation_rate = int((resolved_count / total_count) * 100) if total_count > 0 else 0
+    urgent_count = Vulnerability.query.filter(Vulnerability.severity.in_(['High', 'Critical']), Vulnerability.status != 'Resolved').count()
 
-# 2. CREATE Route: Handle form submission and save to SQLite
+    return render_template(
+        'index.html', 
+        vulns=vulns, 
+        search_query=search_query, 
+        severity_filter=severity_filter,
+        total_count=total_count,
+        remediation_rate=remediation_rate,
+        urgent_count=urgent_count
+    )
+
+# 2. CREATE Route: Handle form submission with Input Sanitization (XSS Prevention)
 @app.route('/add', methods=['POST'])
 def add():
-    title = request.form.get('title')
-    description = request.form.get('description')
-    severity = request.form.get('severity')
+    raw_title = request.form.get('title', '')
+    raw_description = request.form.get('description', '')
+    severity = request.form.get('severity', 'Medium')
+
+    # Sanitization layer
+    clean_title = html.escape(raw_title)
+    clean_description = html.escape(raw_description)
 
     new_vuln = Vulnerability(
-        title=title, 
-        description=description, 
+        title=clean_title, 
+        description=clean_description, 
         severity=severity, 
         status="Open"
     )
